@@ -1,17 +1,32 @@
 #include <stdio.h>
+#include <string.h>
+#include <strings.h>
+#include <stdlib.h>
 
 
 typedef struct node
 {
-    int data;
+    char word[100];
     struct node *left ;
     struct node *right;
     int height ;
 }node ;
 
-node * newnode(int data) {
+int max(int a, int b) {
+    return (a > b) ? a : b;
+}
+int height(node *n) {
+    return n ? n->height : 0;
+}
+
+int  getBalance(node *root) {
+    if (root == NULL) return 0;
+    return height(root->left) - height(root->right);
+}
+
+node * newnode(char *word) {
     node *temp = (node *)malloc(sizeof(node));
-    temp->data = data;
+    strncpy(temp->word, word,100);
     temp->left = NULL;
     temp->right = NULL;
     temp->height = 1;
@@ -50,21 +65,11 @@ node * rightRotate(node *y) {
     return x;
 }
 
-int max(int a, int b) {
-    return (a > b) ? a : b;
-}
-int height(node *n) {
-    return n ? n->height : 0;
-}
 
-node * getBalance(node *root) {
-    if (root == NULL) return 0;
-    return height(root->left) - height(root->right);
-}
-node * insert(node *root, int data) {
-    if (root == NULL) return newnode(data);
-    if (data < root->data) root->left = insert(root->left, data);
-    else if (data > root->data) root->right = insert(root->right, data);
+node * insert(node *root, char*word) {
+    if (root == NULL) return newnode(word);
+    if (strcasecmp(word,root->word)<0) root->left = insert(root->left,word);
+    else if (strcasecmp(word,root->word)>0) root->right = insert(root->right, word);
     else return root; // No duplicates
 
     // Update height and balance factor
@@ -72,26 +77,30 @@ node * insert(node *root, int data) {
     int balance = getBalance(root);
 
     // Left Left Case
-    if (balance > 1 && data < root->left->data)
+    if (balance > 1 && strcasecmp(word,root->left->word)<0)
         return rightRotate(root);
 
     // Right Right Case
-    if (balance < -1 && data > root->right->data)
+    if (balance < -1 && strcasecmp(word,root->right->word)>0)
         return leftRotate(root);
 
     // Left Right Case
-    if (balance > 1 && data > root->left->data) {
+    if (balance > 1 && strcasecmp(word,root->left->word)>0) {
         root->left = leftRotate(root->left);
         return rightRotate(root);
     }
 
     // Right Left Case
-    if (balance < -1 && data < root->right->data) {
+    if (balance < -1 && strcasecmp(word,root->right->word)<0) {
         root->right = rightRotate(root->right);
         return leftRotate(root);
     }
 
     return root;
+
+
+
+
 }
 
 int main(void) {
